@@ -3,9 +3,16 @@
 -- ==========================================
 
 -- 1. Create the Visual GUI Interface
+local Players = game:GetService("Players")
+local LocalPlayer = Players.LocalPlayer
+
+-- Wait for the PlayerGui container to safely load into the game instance
+local PlayerGui = LocalPlayer:WaitForChild("PlayerGui")
+
 local ScreenGui = Instance.new("ScreenGui")
 ScreenGui.Name = "RoGhoulKajiriHub"
-ScreenGui.Parent = game:GetService("CoreGui")
+ScreenGui.ResetOnSpawn = false -- Crucial: This keeps your GUI on screen if you die!
+ScreenGui.Parent = PlayerGui
 
 local MainFrame = Instance.new("Frame")
 MainFrame.Name = "MainFrame"
@@ -27,6 +34,17 @@ TitleLabel.Font = Enum.Font.SourceSansBold
 TitleLabel.TextSize = 16
 TitleLabel.Parent = MainFrame
 
+local CloseButton = Instance.new("TextButton")
+CloseButton.Name = "CloseButton"
+CloseButton.Size = UDim2.new(0, 30, 0, 30)
+CloseButton.Position = UDim2.new(1, -35, 0, 5)
+CloseButton.BackgroundColor3 = Color3.fromRGB(60, 30, 30)
+CloseButton.Text = "X"
+CloseButton.TextColor3 = Color3.fromRGB(255, 100, 100)
+CloseButton.Font = Enum.Font.SourceSansBold
+CloseButton.TextSize = 14
+CloseButton.Parent = MainFrame
+
 local ToggleButton = Instance.new("TextButton")
 ToggleButton.Size = UDim2.new(0, 260, 0, 50)
 ToggleButton.Position = UDim2.new(0, 20, 0, 70)
@@ -39,9 +57,6 @@ ToggleButton.Parent = MainFrame
 
 -- 2. State & Core Logic Setup
 _G.CustomFarm = false
-
-local Players = game:GetService("Players")
-local LocalPlayer = Players.LocalPlayer
 local TweenService = game:GetService("TweenService")
 
 local AttackPositions = {
@@ -70,6 +85,12 @@ local function moveToCoord(targetCFrame)
     end
 end
 
+-- Close GUI Event Handler
+CloseButton.MouseButton1Click:Connect(function()
+    _G.CustomFarm = false 
+    ScreenGui:Destroy() 
+end)
+
 -- 3. Toggle Activation Handling
 ToggleButton.MouseButton1Click:Connect(function()
     _G.CustomFarm = not _G.CustomFarm
@@ -78,7 +99,6 @@ ToggleButton.MouseButton1Click:Connect(function()
         ToggleButton.BackgroundColor3 = Color3.fromRGB(50, 180, 50)
         ToggleButton.Text = "Farm Status: ACTIVE"
         
-        -- Launch the farming sequence asynchronously
         task.spawn(function()
             while _G.CustomFarm do
                 task.wait(0.1)
@@ -107,7 +127,7 @@ ToggleButton.MouseButton1Click:Connect(function()
                         end
                     end
                 else
-                    task.wait(1) -- Idle step if boss is missing
+                    task.wait(1) 
                 end
             end
         end)
